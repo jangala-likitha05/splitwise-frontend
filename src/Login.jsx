@@ -10,6 +10,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const send = (path, body) =>
     fetch(`${API}/${path}`, {
@@ -20,6 +21,8 @@ function Login() {
 
   const handleSubmit = async () => {
     setError("");
+    setSuccess("");
+
     if (!email || !password || (mode === "signup" && !name)) {
       setError("Please fill in all fields");
       return;
@@ -33,6 +36,12 @@ function Login() {
           setError(data.message);
           return;
         }
+        // Don't log in automatically. Confirm, then show the login form.
+        setSuccess("Account created successfully! Please log in.");
+        setMode("login");
+        setName("");
+        setPassword("");
+        return;
       }
 
       const res = await send("login", { email, password });
@@ -43,10 +52,11 @@ function Login() {
       }
       login(data.user, data.token);
     } catch {
-      setError("Could not reach the server. It may be waking up, try again in a minute.");
+      setError(
+        "Could not reach the server. It may be waking up, try again in a minute.",
+      );
     }
   };
-
   return (
     <div className="card">
       <h2>{mode === "login" ? "Login" : "Create account"}</h2>
@@ -54,18 +64,32 @@ function Login() {
         {mode === "signup" && (
           <div className="field">
             <label htmlFor="name">Name</label>
-            <input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
         )}
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-
+        {success && <p className="success">{success}</p>}
         {error && <p className="error">{error}</p>}
 
         <button onClick={handleSubmit}>
